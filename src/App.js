@@ -25,14 +25,15 @@ import React from 'react';
 class TodoApp extends React.Component {
     constructor(props) {
         super(props)
-        this.state = {
+        /*this.state = {
             items: [
                 { text: "Learn JavaScript", done: false, display: true },
                 { text: "Learn React", done: false, display: true },
                 { text: "Play around in JSFiddle", done: true, display: true },
                 { text: "Build something awesome", done: true, display: true }
             ]
-        }
+        }*/
+        this.state = {items: JSON.parse(localStorage.getItem("tasks"))};
 
         this.updateSearch = this.updateSearch.bind(this);
         this.orderUp = this.orderUp.bind(this);
@@ -45,48 +46,52 @@ class TodoApp extends React.Component {
     render() {
         return (
             <div>
+                <button onClick={() => this.affiche()} >LOG</button>
                 <input id="searchBar" type="text" onChange={this.updateSearch} placeholder="search..." />
                 <button onClick={this.addTask} >Ajouter une tâche</button>
                 <h2>Todos:</h2>
                 <ol>
                     {this.state.items.map(item => (
-                        <li key={item.id} className={(item.display ? "" : "hide")}>
+                        <li key={item.title}>
                             <label>
-                                <input type="checkbox" checked={item.done} onChange={() => this.changeState(item.text)} />
-                                <span className={item.done ? "done" : ""}>{item.text}</span>
-                                <button onClick={() => this.deleteTask(item.text)}>-</button>
-                                <button onClick={() => this.orderUp(item.text)}>up</button>
-                                <button onClick={() => this.orderDown(item.text)}>down</button>
+                                <input type="checkbox" checked={item.isChecked} onChange={() => this.changeState(item.title)} />
+                                <span className={item.isChecked ? "done" : ""}>{item.title}</span>
+                                <button onClick={() => this.deleteTask(item.title)}>-</button>
+                                <button onClick={() => this.orderUp(item.title)}>up</button>
+                                <button onClick={() => this.orderDown(item.title)}>down</button>
                             </label>
                         </li>
                     ))}
                 </ol>
-                <span>Il y a {this.state.items.length} Tasks ({this.state.items.filter((item) => !item.done).length} en attente{(this.state.items.filter((item) => !item.done).length > 1 ? "s" : "")})</span>
+                <span>Il y a {this.state.items.length} Tasks ({this.state.items.filter((item) => !item.isChecked).length} en attente{(this.state.items.filter((item) => !item.isChecked).length > 1 ? "s" : "")})</span>
             </div>
         )
     }
 
+    affiche(){
+        console.log("state",this.state);
+        console.log("items",this.state.items);
+    }
+
     updateSearch(e) {
-        this.state.items.forEach((item) => {
-            if (item.text.includes(e.target.value)) {
-                item.display = true;
-            }
-            else {
-                item.display = false;
-            }
+        const searchValue = e.target.value.toUpperCase();
+        this.setState(prevState => {
+            const items = JSON.parse(localStorage.getItem("tasks")).filter((item) => item.title.toUpperCase().includes(searchValue));
+            console.log("items",items);
+            return {items};
         });
-        this.setState({ items: this.state.items });
     }
 
     orderUp(itemId) {
         this.setState(prevState => {
             const items = [...prevState.items]; // create a copy of the state array
-            const index = items.findIndex(item => item.text === itemId);
+            const index = items.findIndex(item => item.title === itemId);
             if (index - 1 >= 0) {
                 let tmp = items[index - 1];
                 items[index - 1] = items[index];
                 items[index] = tmp;
             }
+            localStorage.setItem("tasks", JSON.stringify(items))
             return { items }; // return the new state
         });
     }
@@ -94,41 +99,47 @@ class TodoApp extends React.Component {
     orderDown(itemId) {
         this.setState(prevState => {
             const items = [...prevState.items]; // create a copy of the state array
-            const index = items.findIndex(item => item.text === itemId);
+            const index = items.findIndex(item => item.title === itemId);
             if (index + 1 < items.length) {
                 let tmp = items[index + 1];
                 items[index + 1] = items[index];
                 items[index] = tmp;
             }
+            localStorage.setItem("tasks", JSON.stringify(items))
             return { items }; // return the new state
         });
     }
 
     addTask() {
-        console.log("tâche ajouter");
-        const newText = prompt("Donner un titre à la tâche :");
-        const newTask = { text: newText, done: false, display: true };
-
-        this.setState(prevState => ({
-            items: [...prevState.items, newTask]
-        }));
+        const newText = prompt("Donner un titre à la tâche :")
+        if(newText !== null && newText !== ""){
+            console.log("tâche ajouter");
+            this.setState(prevState => {
+                const newTask = { title: newText, isChecked: false}
+                const items = [...prevState.items, newTask]
+                localStorage.setItem("tasks", JSON.stringify(items));
+                return {items};
+            });
+            
+        }
     }
 
     deleteTask(itemId) {
         if (window.confirm("T sur mon reuf ?")) {
             this.setState(prevState => {
                 const items = [...prevState.items]; // create a copy of the state array
-                const index = items.findIndex(item => item.text === itemId);
+                const index = items.findIndex(item => item.title === itemId);
                 items.splice(index, 1); // modify the copied array
+                localStorage.setItem("tasks", JSON.stringify(items));
                 return { items }; // return the new state
             });
         }
     }
 
     changeState(itemId) {
-        const index = this.state.items.findIndex(item => item.text === itemId);
+        const index = this.state.items.findIndex(item => item.title === itemId);
         const updatedItem = this.state.items[index]
-        updatedItem.done = !updatedItem.done;
+        updatedItem.isChecked = !updatedItem.isChecked;
         this.setState(prevState => ({
             items: [
                 ...prevState.items.slice(0, index), // Include items before the updated one
@@ -136,6 +147,7 @@ class TodoApp extends React.Component {
                 ...prevState.items.slice(index + 1) // Include items after the updated one
             ]
         }));
+        localStorage.setItem("tasks", JSON.stringify(this.state.items));
     }
 }
 
