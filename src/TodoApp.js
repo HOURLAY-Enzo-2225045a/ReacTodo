@@ -2,7 +2,8 @@ import './App.css';
 import React from 'react';
 import Header from './Header';
 import Footer from './Footer';
-import { MdDelete } from "react-icons/md";
+import DeleteModal from './DeleteModal';
+
 import { FaArrowAltCircleDown } from "react-icons/fa";
 import { FaArrowAltCircleUp } from "react-icons/fa";
 import { MdRadioButtonUnchecked } from "react-icons/md";
@@ -69,7 +70,7 @@ class TodoApp extends React.Component {
                                     <div className="button">
                                         <input type="checkbox" id={"checkbox"+item.title} checked={item.isChecked} onChange={() => this.changeState(item.title)} />
                                         {item.isChecked ? <GoCheckCircleFill /> : <MdRadioButtonUnchecked /> }
-                                        <button onClick={() => this.deleteTask(item.title)}><MdDelete /></button>
+                                        <DeleteModal deleteTask={this.deleteTask} item={item.title} />
                                         <div className="order">
                                             <button onClick={() => this.orderUp(item.title)}><FaArrowAltCircleUp /></button>
                                             <button onClick={() => this.orderDown(item.title)}><FaArrowAltCircleDown /></button>
@@ -150,15 +151,13 @@ class TodoApp extends React.Component {
     }
 
     deleteTask(itemId) {
-        if (window.confirm("T sur mon reuf ?")) {
-            this.setState(prevState => {
-                const items = [...prevState.items]; // create a copy of the state array
-                const index = items.findIndex(item => item.title === itemId);
-                items.splice(index, 1); // modify the copied array
-                localStorage.setItem("tasks", JSON.stringify(items));
-                return { items }; // return the new state
-            }, () => this.updateSearchResults());
-        }
+        this.setState(prevState => {
+            const items = [...prevState.items]; // create a copy of the state array
+            const index = items.findIndex(item => item.title === itemId);
+            items.splice(index, 1); // modify the copied array
+            localStorage.setItem("tasks", JSON.stringify(items));
+            return { items }; // return the new state
+        }, () => this.updateSearchResults());
     }
 
     changeState(itemId) {

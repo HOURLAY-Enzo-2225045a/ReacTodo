@@ -94,6 +94,10 @@ h1 {
   margin-bottom: 15px;
 }
 
+input[type="checkbox"] {
+  opacity: 0;
+}
+
 .done {
   color: rgba(0, 0, 0, 0.3);
   text-decoration: line-through;
@@ -128,4 +132,17 @@ button {
   padding: 20px;
   border: 1px solid #888;
   width: 80%;
+}
+
+.modal-content button {
+  background-color: #000;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
 }
