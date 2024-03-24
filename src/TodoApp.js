@@ -1,5 +1,8 @@
 import './App.css';
 import React from 'react';
+import Header from './Header';
+import Footer from './Footer';
+
 
 /*function App() {
   return (
@@ -50,25 +53,24 @@ class TodoApp extends React.Component {
     render() {
         const itemsToDisplay = this.state.searchResults || this.state.items;
         return (
-            <div>
-                <button onClick={() => this.affiche()} >LOG</button>
-                <input id="searchBar" type="text" onChange={this.updateSearch} placeholder="search..." />
-                <button onClick={this.addTask} >Ajouter une tâche</button>
-                <h2>Todos:</h2>
+            <div className='TodoApp-body'>
+                <button onClick={() => this.affiche()}>LOG</button>
+                <Header items={this.state.items}/>
+                <h1>Todos:</h1>
                 <ol>
                     {itemsToDisplay.map(item => (
                         <li key={item.title}>
                             <label>
                                 <input type="checkbox" checked={item.isChecked} onChange={() => this.changeState(item.title)} />
                                 <span className={item.isChecked ? "done" : ""}>{item.title}</span>
-                                <button onClick={() => this.deleteTask(item.title)}>-</button>
-                                <button onClick={() => this.orderUp(item.title)}>up</button>
-                                <button onClick={() => this.orderDown(item.title)}>down</button>
+                                <input type="button" onClick={() => this.deleteTask(item.title)} value="-" />
+                                <input type="button" onClick={() => this.orderUp(item.title)} value="up" />
+                                <input type="button" onClick={() => this.orderDown(item.title)} value="down" />
                             </label>
                         </li>
                     ))}
                 </ol>
-                <span>Il y a {this.state.items.length} Tasks ({this.state.items.filter((item) => !item.isChecked).length} en attente{(this.state.items.filter((item) => !item.isChecked).length > 1 ? "s" : "")})</span>
+                <Footer updateSearch={this.updateSearch} addTask={this.addTask} />
             </div>
         )
     }
@@ -126,7 +128,9 @@ class TodoApp extends React.Component {
     }
 
     addTask() {
+        console.log('addTask was called');
         const newText = prompt("Donner un titre à la tâche :")
+        console.log('newText:', newText);
         if(newText !== null && newText !== ""){
             console.log("tâche ajouter");
             this.setState(prevState => {
@@ -135,7 +139,6 @@ class TodoApp extends React.Component {
                 localStorage.setItem("tasks", JSON.stringify(items));
                 return {items};
             }, () => this.updateSearchResults());
-            
         }
     }
 
