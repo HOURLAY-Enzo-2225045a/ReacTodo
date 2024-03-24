@@ -24,16 +24,20 @@ import React from 'react';
 
 class TodoApp extends React.Component {
     constructor(props) {
-        super(props)
-        /*this.state = {
-            items: [
-                { text: "Learn JavaScript", done: false, display: true },
-                { text: "Learn React", done: false, display: true },
-                { text: "Play around in JSFiddle", done: true, display: true },
-                { text: "Build something awesome", done: true, display: true }
-            ]
-        }*/
-        this.state = {items: JSON.parse(localStorage.getItem("tasks"))};
+        super(props);
+        if (localStorage.getItem("tasks") === null) {
+            this.state = {
+                items: [
+                    { title: "Learn JavaScript", isChecked: false },
+                    { title: "Learn React", isChecked: false },
+                    { title: "Play around in JSFiddle", isChecked: true },
+                    { title: "Build something awesome", isChecked: true }
+                ]
+            }
+        } else {
+            this.state = {items: JSON.parse(localStorage.getItem("tasks"))};
+        }
+        
 
         this.updateSearch = this.updateSearch.bind(this);
         this.orderUp = this.orderUp.bind(this);
@@ -44,6 +48,7 @@ class TodoApp extends React.Component {
     }
 
     render() {
+        const itemsToDisplay = this.state.searchResults || this.state.items;
         return (
             <div>
                 <button onClick={() => this.affiche()} >LOG</button>
@@ -51,7 +56,7 @@ class TodoApp extends React.Component {
                 <button onClick={this.addTask} >Ajouter une tâche</button>
                 <h2>Todos:</h2>
                 <ol>
-                    {this.state.items.map(item => (
+                    {itemsToDisplay.map(item => (
                         <li key={item.title}>
                             <label>
                                 <input type="checkbox" checked={item.isChecked} onChange={() => this.changeState(item.title)} />
@@ -71,15 +76,25 @@ class TodoApp extends React.Component {
     affiche(){
         console.log("state",this.state);
         console.log("items",this.state.items);
+        console.log("tasks",JSON.parse(localStorage.getItem("tasks")));
     }
 
     updateSearch(e) {
         const searchValue = e.target.value.toUpperCase();
         this.setState(prevState => {
-            const items = JSON.parse(localStorage.getItem("tasks")).filter((item) => item.title.toUpperCase().includes(searchValue));
-            console.log("items",items);
-            return {items};
+            const searchResults = JSON.parse(localStorage.getItem("tasks")).filter((item) => item.title.toUpperCase().includes(searchValue));
+            console.log("searchResults",searchResults);
+            return {searchResults};
         });
+    }
+
+    updateSearchResults() {
+        console.log("updateSearchResults");
+        const searchValue = document.getElementById("searchBar").value.toUpperCase();
+        if (searchValue !== "" && searchValue !== null) {
+            const searchResults = this.state.items.filter((item) => item.title.toUpperCase().includes(searchValue));
+            this.setState({ searchResults });
+        }
     }
 
     orderUp(itemId) {
@@ -93,7 +108,7 @@ class TodoApp extends React.Component {
             }
             localStorage.setItem("tasks", JSON.stringify(items))
             return { items }; // return the new state
-        });
+        }, () => this.updateSearchResults());
     }
 
     orderDown(itemId) {
@@ -107,7 +122,7 @@ class TodoApp extends React.Component {
             }
             localStorage.setItem("tasks", JSON.stringify(items))
             return { items }; // return the new state
-        });
+        }, () => this.updateSearchResults());
     }
 
     addTask() {
@@ -119,7 +134,7 @@ class TodoApp extends React.Component {
                 const items = [...prevState.items, newTask]
                 localStorage.setItem("tasks", JSON.stringify(items));
                 return {items};
-            });
+            }, () => this.updateSearchResults());
             
         }
     }
@@ -132,22 +147,19 @@ class TodoApp extends React.Component {
                 items.splice(index, 1); // modify the copied array
                 localStorage.setItem("tasks", JSON.stringify(items));
                 return { items }; // return the new state
-            });
+            }, () => this.updateSearchResults());
         }
     }
 
     changeState(itemId) {
-        const index = this.state.items.findIndex(item => item.title === itemId);
-        const updatedItem = this.state.items[index]
-        updatedItem.isChecked = !updatedItem.isChecked;
-        this.setState(prevState => ({
-            items: [
-                ...prevState.items.slice(0, index), // Include items before the updated one
-                updatedItem, // Insert the updated item
-                ...prevState.items.slice(index + 1) // Include items after the updated one
-            ]
-        }));
-        localStorage.setItem("tasks", JSON.stringify(this.state.items));
+        this.setState(prevState => {
+            const items = [...prevState.items]; // create a copy of the state array
+            const index = items.findIndex(item => item.title === itemId);
+            const updatedItem = {...items[index], isChecked: !items[index].isChecked};
+            items[index] = updatedItem; // modify the copied array
+            localStorage.setItem("tasks", JSON.stringify(items));
+            return { items }; // return the new state
+        }, () => this.updateSearchResults());
     }
 }
 
