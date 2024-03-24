@@ -2,11 +2,15 @@ import './App.css';
 import React from 'react';
 
 function Header({items}) {
+    const totalTasks = items.length;
+    const completedTasks = items.filter((item) => item.isChecked).length;
+    const progress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+
     return (
         <header className="TodoApp-header">
-            <h1>HEADER ICI</h1>
-            <span>Il y a {items.length} Tasks ({items.filter((item) => !item.isChecked).length} en attente{(items.filter((item) => !item.isChecked).length > 1 ? "s" : "")})</span>
-            <progress value={20} max="100" />
+            <h1>My <mark>Todo List</mark></h1>
+            <progress value={progress} max="100" /> <br/>
+            <span>{completedTasks} / {totalTasks} tâche{(completedTasks > 1 ? "s" : "")} accomplie</span> 
         </header>
     );
 }

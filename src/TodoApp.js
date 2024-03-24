@@ -2,6 +2,12 @@ import './App.css';
 import React from 'react';
 import Header from './Header';
 import Footer from './Footer';
+import { MdDelete } from "react-icons/md";
+import { FaArrowAltCircleDown } from "react-icons/fa";
+import { FaArrowAltCircleUp } from "react-icons/fa";
+import { MdRadioButtonUnchecked } from "react-icons/md";
+import { GoCheckCircleFill } from "react-icons/go";
+
 
 /*function App() {
   return (
@@ -52,23 +58,28 @@ class TodoApp extends React.Component {
     render() {
         const itemsToDisplay = this.state.searchResults || this.state.items;
         return (
-            <div className='TodoApp-body'>
-                <button onClick={() => this.affiche()}>LOG</button>
+            <div>
                 <Header items={this.state.items}/>
-                <h1>Todos:</h1>
-                <ol>
-                    {itemsToDisplay.map(item => (
-                        <li key={item.title}>
-                            <label>
-                                <input type="checkbox" checked={item.isChecked} onChange={() => this.changeState(item.title)} />
-                                <span className={item.isChecked ? "done" : ""}>{item.title}</span>
-                                <input type="button" onClick={() => this.deleteTask(item.title)} value="-" />
-                                <input type="button" onClick={() => this.orderUp(item.title)} value="up" />
-                                <input type="button" onClick={() => this.orderDown(item.title)} value="down" />
-                            </label>
-                        </li>
-                    ))}
-                </ol>
+                <div className="TodoApp-body">
+                    <ol>
+                        {itemsToDisplay.map(item => (
+                            <li key={item.title}>
+                                <label className="content">
+                                    <span className={item.isChecked ? "done" : ""}>{item.title}</span>
+                                    <div className="button">
+                                        <input type="checkbox" id={"checkbox"+item.title} checked={item.isChecked} onChange={() => this.changeState(item.title)} />
+                                        {item.isChecked ? <GoCheckCircleFill /> : <MdRadioButtonUnchecked /> }
+                                        <button onClick={() => this.deleteTask(item.title)}><MdDelete /></button>
+                                        <div className="order">
+                                            <button onClick={() => this.orderUp(item.title)}><FaArrowAltCircleUp /></button>
+                                            <button onClick={() => this.orderDown(item.title)}><FaArrowAltCircleDown /></button>
+                                        </div>
+                                    </div>
+                                </label>
+                            </li>
+                        ))}
+                    </ol>
+                </div>
                 <Footer updateSearch={this.updateSearch} addTask={this.addTask} />
             </div>
         )
@@ -126,10 +137,7 @@ class TodoApp extends React.Component {
         }, () => this.updateSearchResults());
     }
 
-    addTask() {
-        console.log('addTask was called');
-        const newText = prompt("Donner un titre à la tâche :")
-        console.log('newText:', newText);
+    addTask(newText) {
         if(newText !== null && newText !== ""){
             console.log("tâche ajouter");
             this.setState(prevState => {
